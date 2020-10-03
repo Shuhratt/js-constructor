@@ -1,11 +1,7 @@
 import { model } from './model';
 import './style/main.css';
+import {Site} from './classes/site'
 
-
-let html = '' ;
-const $site = document.getElementById('site') ;
-
-model.forEach(bl => {
-   $site.insertAdjacentHTML('beforeend', bl.toHTMl())
-})
+const site = new Site('#site') ;
+site.render(model)
 
