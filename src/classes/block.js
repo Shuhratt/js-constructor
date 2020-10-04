@@ -32,7 +32,7 @@ export class TextBlock extends Block {
    }
 
    toHTMl() {
-      return row(col(`<p>${this.value}</p>`))
+      return row(col(`<p style="${css(this.options.styles)}">${this.value}</p>`))
    }
 
 }

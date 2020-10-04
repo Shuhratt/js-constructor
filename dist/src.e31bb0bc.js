@@ -117,8 +117,8 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"assets/1.png":[function(require,module,exports) {
-module.exports = "/1.9be96cb3.png";
+})({"assets/1.jpg":[function(require,module,exports) {
+module.exports = "/1.281c93e8.jpg";
 },{}],"utilits.js":[function(require,module,exports) {
 "use strict";
 
@@ -128,6 +128,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.row = row;
 exports.col = col;
 exports.css = css;
+exports.block = block;
 
 function row(content) {
   return "<div class=\"row\">".concat(content, "</div>");
@@ -139,10 +140,19 @@ function col(content) {
 
 function css() {
   var styles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  if (typeof styles === 'string') {
+    return styles;
+  }
+
   var keys = Object.keys(styles);
   return keys.map(function (item) {
     return "".concat(item, ": ").concat(styles[item]);
   }).join(';');
+}
+
+function block(type) {
+  return "\n      <form name=\"".concat(type, "\">\n        <h5>").concat(type, "</h5>\n        <div class=\"form-group\">\n          <input type=\"text\" class=\"form-control\" name=\"valueEl\" placeholder=\"value\" />\n        </div>\n        <div class=\"form-group\">\n          <input type=\"text\" class=\"form-control\" name=\"styles\" placeholder=\"styles\" />\n        </div>\n        <button type=\"submit\" class=\"btn btn-primary\">\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C</button>\n      </form>\n      <hr />\n  ");
 }
 },{}],"classes/block.js":[function(require,module,exports) {
 "use strict";
@@ -233,7 +243,7 @@ var TextBlock = /*#__PURE__*/function (_Block2) {
   _createClass(TextBlock, [{
     key: "toHTMl",
     value: function toHTMl() {
-      return (0, _utilits.row)((0, _utilits.col)("<p>".concat(this.value, "</p>")));
+      return (0, _utilits.row)((0, _utilits.col)("<p style=\"".concat((0, _utilits.css)(this.options.styles), "\">").concat(this.value, "</p>")));
     }
   }]);
 
@@ -298,7 +308,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.model = void 0;
 
-var _ = _interopRequireDefault(require("./assets/1.png"));
+var _ = _interopRequireDefault(require("./assets/1.jpg"));
 
 var _block = require("./classes/block");
 
@@ -313,7 +323,7 @@ var model = [new _block.TitleBlock('Hello World JS', {
   }
 }), new _block.TextBlock('Custom text Js 2'), new _block.ColumnsBlock(['111111', '2222222', '33333333']), new _block.ImageBlock(_.default)];
 exports.model = model;
-},{"./assets/1.png":"assets/1.png","./classes/block":"classes/block.js"}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+},{"./assets/1.jpg":"assets/1.jpg","./classes/block":"classes/block.js"}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -411,6 +421,7 @@ var Site = /*#__PURE__*/function () {
     value: function render(data) {
       var _this = this;
 
+      this.$selector.innerHTML = '';
       data.forEach(function (block) {
         _this.$selector.insertAdjacentHTML('beforeend', block.toHTMl());
       });
@@ -421,18 +432,122 @@ var Site = /*#__PURE__*/function () {
 }();
 
 exports.Site = Site;
-},{}],"index.js":[function(require,module,exports) {
+},{}],"classes/sidebar.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Sidebar = void 0;
+
+var _utilits = require("../utilits");
+
+var _block = require("./block");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Sidebar = /*#__PURE__*/function () {
+  function Sidebar(selector, callback) {
+    _classCallCheck(this, Sidebar);
+
+    this.$el = document.querySelector(selector);
+    this.update = callback;
+    this.init();
+  }
+
+  _createClass(Sidebar, [{
+    key: "init",
+    value: function init() {
+      this.$el.innerHTML = '';
+      this.$el.insertAdjacentHTML('afterbegin', this.teamplete);
+      this.$el.addEventListener('submit', this.addBlock.bind(this)); // ??? bind
+    }
+  }, {
+    key: "addBlock",
+    value: function addBlock(e) {
+      e.preventDefault();
+      var type = e.target.name;
+      var value = e.target.valueEl.value;
+      var styles = e.target.styles.value;
+      var textBlock = new _block.TextBlock(value, {
+        styles: styles
+      });
+      this.update(textBlock);
+      e.target.valueEl.value = '';
+      e.target.styles.value = '';
+    }
+  }, {
+    key: "teamplete",
+    get: function get() {
+      return [(0, _utilits.block)('text'), (0, _utilits.block)('title')].join('');
+    }
+  }]);
+
+  return Sidebar;
+}();
+
+exports.Sidebar = Sidebar;
+},{"../utilits":"utilits.js","./block":"classes/block.js"}],"classes/app.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.App = void 0;
+
+var _site = require("./site");
+
+var _sidebar = require("./sidebar");
+
+var _model = require("../model");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var App = /*#__PURE__*/function () {
+  function App(model) {
+    _classCallCheck(this, App);
+
+    this.model = model;
+  }
+
+  _createClass(App, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      var site = new _site.Site('#site');
+      site.render(this.model);
+      new _sidebar.Sidebar('#panel', function (newBlock) {
+        _this.model.push(newBlock);
+
+        site.render(_this.model);
+      });
+    }
+  }]);
+
+  return App;
+}();
+
+exports.App = App;
+},{"./site":"classes/site.js","./sidebar":"classes/sidebar.js","../model":"model.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 var _model = require("./model");
 
 require("./style/main.css");
 
-var _site = require("./classes/site");
+var _app = require("./classes/app");
 
-var site = new _site.Site('#site');
-site.render(_model.model);
-},{"./model":"model.js","./style/main.css":"style/main.css","./classes/site":"classes/site.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+new _app.App(_model.model).init();
+},{"./model":"model.js","./style/main.css":"style/main.css","./classes/app":"classes/app.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -460,7 +575,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60399" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "5107" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -637,4 +752,3 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 },{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
-//# sourceMappingURL=/src.e31bb0bc.js.map
