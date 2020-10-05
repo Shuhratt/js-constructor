@@ -1,2 +1,2 @@
 # js-constructor
-js + parcel 
+js + parcel + firebase
